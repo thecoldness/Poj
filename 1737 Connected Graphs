@@ -1,0 +1,120 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<cctype>
+using namespace std;
+const int Max_len = 1250;
+const int Max_n = 55;
+struct node{
+	int top , num[Max_len];
+	void clean()
+	{
+		memset(num , 0 , sizeof(num));
+		return;
+	}
+	int& operator [](int x)
+	{
+		return num[x];
+	}
+}c[Max_n][Max_n] , f[Max_n] , down;
+node operator + (node x , node y)
+{
+	node ret;
+	ret.clean();
+	int topx = x.top , topy = y.top;
+	for(int i = 1 ; i <= max(topx , topy) ; ++ i)
+		ret[i] = x[i] + y[i];
+	for(int i = 1 ; i <= max(topx , topy) + 1 ; ++ i)
+		ret[i + 1] += ret[i] / 10 , ret[i] %= 10;
+	ret.top = max(topx , topy) + 2;
+	while(!ret[ret.top] && ret.top >= 2)	-- ret.top;
+	return ret;
+}
+node operator * (node x , node y)
+{
+	node ret;
+	ret.clean();
+	int topx = x.top , topy = y.top;
+	for(int i = 1 ; i <= topx ; ++ i)
+		for(int j = 1 ; j <= topy ; ++ j)
+			ret[i + j - 1] += x[i] * y[j];
+	for(int i = 1 ; i <= topx + topy + 2 ; ++ i)
+		ret[i + 1] += ret[i] / 10 , ret[i] %= 10;
+	ret.top = topx + topy + 2;
+	while(ret.top >= 2 && !ret[ret.top]) -- ret.top;
+	return ret;
+}
+inline node quickpow(node x , int y)
+{
+	node ret;
+	ret.clean();
+	ret[1] = 1 , ret.top = 1;
+	while(y)
+	{
+		if(y & 1)	ret = ret * x;
+		x = x * x;
+		y >>= 1;
+	}
+	return ret;
+}
+node operator - (node x , node y)
+{
+	node ret;
+	ret.clean();
+	int topx = x.top;
+	for(int i = 1 ; i <= topx ; ++ i)
+		ret[i] = x[i] - y[i];
+	for(int i = 1 ; i <= topx ; ++ i)
+		if(ret[i] < 0)	-- ret[i + 1] , ret[i] += 10;
+	ret.top = topx;
+	while(ret.top > 1 && !ret[ret.top]) -- ret.top;
+	return ret;
+}
+int n;
+inline int read()
+{
+	int res = 0;
+	char c;
+	bool flag = false;
+	c = getchar();
+	while(!isdigit(c))
+	{
+		flag = (c == '-');
+		c = getchar();
+	}
+	while(isdigit(c))
+	{
+		res = res * 10 + (c ^ 48);
+		c = getchar();
+	}
+	return !flag ? res : -res;
+}
+inline void write(int x)
+{
+	for(int i = f[x].top ; i ; -- i)
+		putchar('0' + f[x][i]);
+}
+int main()
+{
+	for(int i = 0 ; i <= 50 ; ++ i)
+		c[i][0][1] = 1 , c[i][0].top = 1;
+	for(int i = 1 ; i <= 50 ; ++ i)
+		for(int j = 1 ; j <= i ; ++ j)
+			c[i][j] = c[i - 1][j] + c[i - 1][j - 1];
+	f[1][1] = f[2][1] = 1;
+	f[1].top = f[2].top = 1;
+	down[1] = 2 , down.top = 1;
+	for(int i = 3 ; i <= 50 ; ++ i)
+	{
+		f[i] = quickpow(down , i * (i - 1) / 2);
+		for(int j = 1 ; j < i ; ++ j)
+			f[i] = f[i] - f[j] * c[i - 1][j - 1] * quickpow(down , (i - j) * (i - j - 1) / 2);
+	}
+	n = read();
+	while(n)
+	{
+		write(n) , putchar('\n');
+		n = read();
+	}
+	return 0;
+}
