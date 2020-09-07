@@ -1,0 +1,102 @@
+#include<cstdio>
+#include<cctype>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+typedef long long ll;
+inline ll read()
+{
+	ll res = 0;
+	char c;
+	bool flag = false;
+	c = getchar();
+	while(!isdigit(c))
+	{
+		flag = (c == '-');
+		c = getchar();
+	}
+	while(isdigit(c))
+	{
+		res = res * 10 + (c ^ 48);
+		c = getchar();
+	}
+	return !flag ? res : -res;
+}
+const int Max_n = 25;
+int n , t;
+ll f[Max_n][Max_n][2] , k;
+inline void build()
+{
+	f[1][1][0] = f[1][1][1] = 1;
+	for(int i = 2 ; i <= 20 ; ++ i)
+		for(int j = 1 ; j <= i ; ++ j)
+		{
+			for(int l = 1 ; l <= j - 1 ; ++ l)
+				f[i][j][1] += f[i - 1][l][0];
+			for(int l = j ; l <= i - 1 ; ++ l)
+				f[i][j][0] += f[i - 1][l][1];
+		}
+}
+bool vis[Max_n];
+void write(int x)
+{
+	if(x < 0)	putchar('-') , x = -x;
+	if(x > 9)	write(x / 10);
+	putchar('0' + x % 10);
+}
+inline void writeblo(int x)
+{
+	write(x);
+	putchar(' ');
+}
+int main()
+{
+	build();
+	t = read();
+	while(t --)
+	{
+		n = read() , k = read();
+		int last , up;
+		memset(vis , false , sizeof(vis));
+		for(int i = 1 ; i <= n ; ++ i)
+		{
+			if(f[n][i][1] >= k)
+			{
+				last = i , up = 1;
+				break;
+			}
+			k -= f[n][i][1];
+			if(f[n][i][0] >= k)
+			{
+				last = i , up = 0;
+				break;
+			}
+			k -= f[n][i][0];
+		}
+		vis[last] = true;
+		writeblo(last);
+		for(int i = 2 ; i <= n ; ++ i)
+		{
+			int kth = 0;
+			for(int j = 1 ; j <= n ; ++ j)
+			{
+				if(vis[j])	continue;
+				++ kth;
+				if((last < j && !up) || (last > j && up))
+				{
+					if(f[n - i + 1][kth][up ^ 1] >= k)
+					{
+						last = j , up ^= 1;
+						vis[j] = true;
+						break;
+					}
+					k -= f[n - i + 1][kth][up ^ 1];
+				}
+			}
+			if(i != n)	writeblo(last);
+			else write(last);
+		}
+		putchar('\n');
+	}
+	return 0;
+}
