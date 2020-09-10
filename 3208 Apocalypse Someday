@@ -1,0 +1,67 @@
+#include<cstdio>
+#include<cctype>
+#include<algorithm>
+#include<climits>
+#include<cstring>
+typedef long long ll;
+inline int read()
+{
+	int res = 0;
+	char c;
+	bool flag = false;
+	c = getchar();
+	while(!isdigit(c))
+	{
+		flag = (c == '-');
+		c = getchar();
+	}
+	while(isdigit(c))
+	{
+		res = res * 10 + (c ^ 48);
+		c = getchar();
+	}
+	return !flag ? res : -res;
+}
+int t , n , num[70] , tot;
+ll got[70][10][10][2];
+inline ll dfs(int pos , int befer , int bef , bool flag , bool ans)
+{
+	if(pos <= 0)	return ans;
+	if(!flag && got[pos][befer][bef][ans] != -1)	return got[pos][befer][bef][ans];
+	ll ret = 0;
+	int maxnum = (flag ? num[pos] : 9);
+	bool cor = (befer == 6 && bef == 6);
+	for(int i = 0 ; i <= maxnum ; ++ i)
+		ret += dfs(pos - 1 , bef , i , (flag && (i == maxnum)) , ans | (cor && (i == 6)));
+	return !flag ? got[pos][befer][bef][ans] = ret : ret;
+}
+inline ll solve(ll x)
+{
+	tot = 0;
+	while(x)
+		num[ ++ tot] = x % 10 , x /= 10;
+	return dfs(tot , 0 , 0 , true , false);
+}
+inline ll find(int x)
+{
+	ll l = 666 , r = LLONG_MAX , ret;
+	while(l <= r)
+	{
+		ll mid = (r - l) >> 1;
+		mid += l;
+		if(solve(mid) >= x)	ret = mid , r = mid - 1;
+		else l = mid + 1;
+	}
+	return ret;
+}
+int main()
+{
+	memset(got , -1 , sizeof(got));
+	t = read();
+	while(t --)
+	{
+		n = read();
+		printf("%lld\n" , find(n));
+	}
+	return 0;
+}
