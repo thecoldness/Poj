@@ -1,0 +1,82 @@
+#include <cctype>
+#include <cstdio>
+#include <algorithm>
+#include <climits>
+using namespace std;
+typedef long long ll;
+inline int read()
+{
+	int res = 0;
+	char c;
+	bool flag = false;
+	c = getchar();
+	while(!isdigit(c))
+	{
+		flag = (c == '-');
+		c = getchar();
+	}
+	while(isdigit(c))
+	{
+		res = res * 10 + (c ^ 48);
+		c = getchar();
+	}
+	return !flag ? res : -res;
+}
+const int Max_n = 5e5 + 5;
+ll sum[Max_n] , f[Max_n];
+int a[Max_n] , n , t , k , q[Max_n];
+inline ll X(ll j)
+{
+	return a[j + 1];
+}
+inline int K(int i)
+{
+	return i;
+}
+inline ll Y(ll j)
+{
+	return f[j] - sum[j] + j * a[j + 1];
+}
+struct vec
+{
+	ll x , y;
+	vec(ll a , ll b)
+	{
+		x = a , y = b;
+	}
+	vec(ll a)
+	{
+		x = X(a) , y = Y(a);
+	}
+	vec() {}
+};
+vec operator - (vec a , vec b)
+{
+	return vec(b.x - a.x , b.y - a.y);
+}
+inline ll cross(vec a , vec b)
+{
+	return a.x * b.y - a.y * b.x;
+}
+int main()
+{
+	t = read();
+	while(t --)
+	{
+		n = read() , k = read();
+		for(int i = 1 ; i < k ; ++ i)
+			f[i] = 25e10;
+		for(int i = 1 ; i <= n ; ++ i)
+			a[i] = read() , sum[i] = sum[i - 1] + a[i];
+		int head = 1 , tail = 0;
+		for(int i = k ; i <= n ; ++ i)
+		{
+			while(head < tail && cross(vec(q[tail - 1]) - vec(q[tail]) , vec(q[tail]) - vec(i - k)) <= 0)	-- tail;
+			q[ ++ tail] = i - k;
+			while(head < tail && cross(vec(q[head]) - vec(q[head + 1]) , vec(1 , K(i))) >= 0) ++ head;
+			f[i] = Y(q[head]) - i * X(q[head]) + sum[i];
+		}
+		printf("%lld\n" , f[n]);
+	}
+	return 0;
+}
