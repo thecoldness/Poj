@@ -1,0 +1,55 @@
+#include <cstdio>
+#include <cctype>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+namespace thecold
+{
+	typedef long long ll;
+
+	inline int read()
+	{
+		int res = 0; bool flag = false;
+		char c = getchar();
+		while(!isdigit(c))
+			flag = (c == '-') , c = getchar();
+		while(isdigit(c))
+			res = res * 10 + (c ^ 48) , c = getchar();
+		return !flag ? res : -res;
+	}
+
+	const int Max_n = 1e4 + 5;
+
+	int a[Max_n] , b[Max_n] , n , rev[Max_n * 10] , to[Max_n];
+	int bel[Max_n] , mn[Max_n] , minest , tot , siz[Max_n];
+
+	ll ans;
+
+	void dfs(const int now)
+	{
+		if(bel[now]) return;
+		mn[tot] = min(mn[tot] , a[now]) , minest = min(minest , a[now]);
+		++ siz[tot] , bel[now] = tot , dfs(to[now]);
+	}
+
+	inline void main()
+	{
+		n = read();memset(mn , 0x3f , sizeof(mn)) , minest = 1e6;
+		for(int i = 1 ; i <= n ; ++ i) a[i] = b[i] = read() , ans += a[i];
+		sort(b + 1 , b + n + 1);
+		for(int i = 1 ; i <= n ; ++ i) rev[b[i]] = i;
+		for(int i = 1 ; i <= n ; ++ i) to[i] = rev[a[i]];
+		for(int i = 1 ; i <= n ; ++ i) if(!bel[i]) ++ tot , dfs(i);
+		for(int i = 1 ; i <= n ; ++ i) if(to[i] == i) ans -= a[i];
+		for(int i = 1 ; i <= tot ; ++ i)
+			if(siz[i] > 1) ans += min((siz[i] - 2) * mn[i] , (siz[i] + 1) * minest + mn[i]);
+		printf("%lld\n" , ans);
+	}
+}
+
+int main()
+{
+	thecold::main();
+	return 0;
+}
